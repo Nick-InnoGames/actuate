@@ -1,0 +1,2 @@
+-cp ${SCOPE_DIR}/./src
+-D actuate=1.8.7
