@@ -2,13 +2,10 @@
 
 
 import motion.actuators.GenericActuator;
-#if (flash || nme || openfl)
-import flash.display.DisplayObject;
-import flash.events.Event;
-import flash.Lib;
-#elseif lime
-import lime.app.Application;
-import lime.system.System;
+#if openfl
+import openfl.display.DisplayObject;
+import openfl.events.Event;
+import openfl.Lib;
 #elseif js
 import js.Browser;
 #else
@@ -29,7 +26,7 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 	private static var actuatorsLength = 0;
 	private static var addedEvent = false;
 
-	#if (!flash && !nme && !openfl && !lime && !js)
+	#if (!openfl && !js)
 	private static var timer:Timer;
 	#end
 
@@ -67,10 +64,8 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 
 			addedEvent = true;
 			#if !actuate_manual_update
-				#if (flash || nme || openfl)
+				#if openfl
 				Lib.current.stage.addEventListener (Event.ENTER_FRAME, stage_onEnterFrame);
-				#elseif lime
-				Application.current.onUpdate.add (stage_onEnterFrame);
 				#elseif js
 				Browser.window.requestAnimationFrame(stage_onEnterFrame);
 				#else
@@ -86,10 +81,8 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 	private static function __getPlatformTime ():Float {
 
 		#if !actuate_manual_time
-			#if (flash || nme || openfl)
+			#if openfl
 			return Lib.getTimer () / 1000;
-			#elseif lime
-			return System.getTimer () / 1000;
 			#elseif js
 			return Browser.window.performance.now () / 1000;
 			#else
@@ -233,17 +226,11 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 
 	private inline function getField<V> (target:V, propertyName:String):Dynamic {
 
-		#if (haxe_209 || haxe3)
-
 		var value = null;
 
 		if (Reflect.hasField (target, propertyName)) {
 
-			#if flash
-			value = untyped target[propertyName];
-			#else
 			value = Reflect.field (target, propertyName);
-			#end
 
 		} else {
 
@@ -252,12 +239,6 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 		}
 
 		return value;
-
-		#else
-
-		return Reflect.field (target, propertyName);
-
-		#end
 
 	}
 
@@ -271,9 +252,7 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 
 			var isField = true;
 
-			#if (haxe_209 || haxe3)
-
-			if (Reflect.hasField (target, i) #if flash && !untyped (target).hasOwnProperty ("set_" + i) #elseif html5 && !(untyped (target).__properties__ && untyped (target).__properties__["set_" + i]) #end) {
+			if (Reflect.hasField (target, i) #if html5 && !(untyped (target).__properties__ && untyped (target).__properties__["set_" + i]) #end) {
 
 				start = Reflect.field (target, i);
 
@@ -284,13 +263,7 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 
 			}
 
-			#else
-
-			start = Reflect.field (target, i);
-
-			#end
-
-			if (Std.is (start, Float)) {
+			if (start is Float) {
 
 				var value:Dynamic = getField (properties, i);
 
@@ -314,8 +287,8 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 
 	private override function move ():Void {
 
-		#if (flash || nme || openfl)
-		toggleVisible = (Reflect.hasField (properties, "alpha") && Std.is (target, DisplayObject));
+		#if openfl
+		toggleVisible = (Reflect.hasField (properties, "alpha") && target is DisplayObject);
 		#else
 		toggleVisible = (Reflect.hasField (properties, "alpha") && Reflect.hasField (properties, "visible"));
 		#end
@@ -368,10 +341,8 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 			super.pause();
 
 			#if !actuate_manual_time
-				#if (flash || nme || openfl)
+				#if openfl
 				pauseTime = Lib.getTimer ();
-				#elseif lime
-				pauseTime = System.getTimer ();
 				#elseif js
 				pauseTime = Browser.window.performance.now () / 1000;
 				#else
@@ -393,10 +364,8 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 			paused = false;
 
 			#if !actuate_manual_time
-				#if (flash || nme || openfl)
+				#if openfl
 				timeOffset += (Lib.getTimer () - pauseTime) / 1000;
-				#elseif lime
-				timeOffset += (System.getTimer () - pauseTime) / 1000;
 				#elseif js
 				timeOffset += (Browser.window.performance.now () - pauseTime) / 1000;
 				#else
@@ -415,19 +384,13 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 
 	#if !js @:generic #end private inline function setField<V> (target:V, propertyName:String, value:Dynamic):Void {
 
-		if (Reflect.hasField (target, propertyName) #if flash && !untyped (target).hasOwnProperty ("set_" + propertyName) #elseif html5 && !(untyped (target).__properties__ && untyped (target).__properties__["set_" + propertyName]) #end) {
+		if (Reflect.hasField (target, propertyName) #if html5 && !(untyped (target).__properties__ && untyped (target).__properties__["set_" + propertyName]) #end) {
 
-			#if flash
-			untyped target[propertyName] = value;
-			#else
 			Reflect.setField (target, propertyName, value);
-			#end
 
 		} else {
 
-			#if (haxe_209 || haxe3)
 			Reflect.setProperty (target, propertyName, value);
-			#end
 
 		}
 
@@ -438,17 +401,11 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 
 		if (details.isField) {
 
-			#if flash
-			untyped details.target[details.propertyName] = value;
-			#else
 			Reflect.setField (details.target, details.propertyName, value);
-			#end
 
 		} else {
 
-			#if (haxe_209 || haxe3)
 			Reflect.setProperty (details.target, details.propertyName, value);
-			#end
 
 		}
 
@@ -657,12 +614,10 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 	#else
 	private
 	#end
-	static function stage_onEnterFrame (#if (flash || nme || openfl) event:Event #elseif lime deltaTime:Int #elseif js deltaTime:Float #end):Void {
+	static function stage_onEnterFrame (#if openfl event:Event #elseif js deltaTime:Float #end):Void {
 		#if !actuate_manual_time
-			#if (flash || nme || openfl)
+			#if openfl
 			var currentTime:Float = Lib.getTimer () / 1000;
-			#elseif lime
-			var currentTime = System.getTimer () / 1000;
 			#elseif js
 			var currentTime = deltaTime / 1000;
 			#else
@@ -700,7 +655,7 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 
 		}
 
-		#if (!flash && !nme && !openfl && !lime && !actuate_manual_time && js)
+		#if (!openfl && !actuate_manual_time && js)
 		Browser.window.requestAnimationFrame(stage_onEnterFrame);
 		#end
 
@@ -710,7 +665,7 @@ class SimpleActuator<T, U> extends GenericActuator<T> {
 }
 
 
-#if (cpp && (!openfl && !lime && !nme))
+#if (cpp && !openfl)
 
 // Custom haxe.Timer implementation for C++
 

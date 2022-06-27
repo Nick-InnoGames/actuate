@@ -2,3 +2,5 @@
 --macro include("motion")
 --js actuate.js
 --no-output
+--library openfl
+--define html5

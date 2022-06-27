@@ -111,9 +111,7 @@ class UpdateTest extends utest.Test {
 
 	private function update(time:Float):Void {
 		SimpleActuator.getTime = function() return time;
-		#if flash
-		SimpleActuator.stage_onEnterFrame(null);
-		#elseif js
+		#if js
 		SimpleActuator.stage_onEnterFrame(0);
 		#else
 		SimpleActuator.stage_onEnterFrame();

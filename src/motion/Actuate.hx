@@ -11,8 +11,8 @@ import motion.actuators.SimpleActuator;
 import motion.actuators.TransformActuator;
 import motion.easing.Expo;
 import motion.easing.IEasing;
-#if (flash || nme || openfl)
-import flash.display.DisplayObject;
+#if openfl
+import openfl.display.DisplayObject;
 #end
 
 @:access(motion.actuators)
@@ -52,7 +52,7 @@ class Actuate {
 	}
 
 
-	#if (flash || nme || openfl)
+	#if openfl
 
 	/**
 	 * Creates a new effects tween
@@ -137,7 +137,7 @@ class Actuate {
 	///*@:generic*/ public static function pause (... targets:Array):void {
 	/*@:generic*/ public static function pause<T> (target:T):Void {
 
-		if (Std.is (target, IGenericActuator)) {
+		if (target is IGenericActuator) {
 
 			var actuator:IGenericActuator = cast target;
 			actuator.pause ();
@@ -205,7 +205,7 @@ class Actuate {
 	 */
 	/*@:generic*/ public static function resume<T> (target:T):Void {
 
-		if (Std.is (target, IGenericActuator)) {
+		if (target is IGenericActuator) {
 
 			var actuator:IGenericActuator = cast target;
 			actuator.resume ();
@@ -255,7 +255,7 @@ class Actuate {
 
 		if (target != null) {
 
-			if (Std.is (target, IGenericActuator)) {
+			if (target is IGenericActuator) {
 
 				var actuator:IGenericActuator = cast target;
 				actuator.stop (null, complete, sendEvent);
@@ -266,17 +266,17 @@ class Actuate {
 
 				if (library != null) {
 
-					if (Std.is (properties, String)) {
+					if (properties is String) {
 
 						var temp = { };
 						Reflect.setField (temp, properties, null);
 						properties = temp;
 
-					} else if (Std.is (properties, Array)) {
+					} else if (properties is Array) {
 
 						var temp = {};
 
-						for (property in cast (properties, Array <Dynamic>)) {
+						for (property in (properties : Array <Dynamic>)) {
 
 							Reflect.setField (temp, property, null);
 
@@ -318,7 +318,7 @@ class Actuate {
 	}
 
 
-	#if (flash || nme || openfl)
+	#if openfl
 
 	/**
 	 * Creates a new transform tween
@@ -434,19 +434,7 @@ class Actuate {
 }
 
 
-#if !haxe3
-import com.eclecticdesignstudio.motion.actuators.FilterActuator;
-import com.eclecticdesignstudio.motion.actuators.GenericActuator;
-import com.eclecticdesignstudio.motion.actuators.TransformActuator;
-import com.eclecticdesignstudio.motion.Actuate;
-import flash.display.DisplayObject;
-import flash.filters.BitmapFilter;
-//import flash.filters.ColorMatrixFilter;
-import flash.geom.Matrix;
-#end
-
-
-#if (flash || nme || openfl)
+#if openfl
 
 private class EffectsOptions {
 
