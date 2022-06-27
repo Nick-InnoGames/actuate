@@ -1,7 +1,3 @@
-*.DS_Store
-test
-node_modules
-package-lock.json
-npm-debug.log
-*.map
-*.tgz
+/node_modules
+/package-lock.json
+/bin

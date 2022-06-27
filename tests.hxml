@@ -1,0 +1,6 @@
+--library actuate
+--library utest
+--class-path test
+--main TestMain
+--define actuate-manual-time
+--define actuate-manual-update

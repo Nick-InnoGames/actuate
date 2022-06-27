@@ -1,0 +1,4 @@
+--class-path src
+--macro include("motion")
+--js actuate.js
+--no-output
