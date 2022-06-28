@@ -1,6 +1,5 @@
 ﻿package motion;
 
-
 import haxe.ds.ObjectMap;
 import motion.actuators.FilterActuator;
 import motion.actuators.GenericActuator;
@@ -16,15 +15,10 @@ import openfl.display.DisplayObject;
 #end
 
 @:access(motion.actuators)
-
-
 class Actuate {
-
-
 	public static var defaultActuator:Class<IGenericActuator> = SimpleActuator;
 	public static var defaultEase:IEasing = Expo.easeOut;
-	private static var targetLibraries = new ObjectMap<Dynamic, Array<IGenericActuator>> ();
-
+	private static var targetLibraries = new ObjectMap<Dynamic, Array<IGenericActuator>>();
 
 	/**
 	 * Copies properties from one object to another. Conflicting tweens are stopped automatically
@@ -34,26 +28,21 @@ class Actuate {
 	 * @param	customActuator		A custom actuator to use instead of the default (Optional)
 	 * @return		The current actuator instance, which can be used to apply properties like onComplete or onUpdate handlers
 	 */
-	/*@:generic*/ public static function apply<T> (target:T, properties:Dynamic, customActuator:Class<GenericActuator<T>> = null):GenericActuator<T> {
-
-		stop (target, properties);
+	/*@:generic*/
+	public static function apply<T>(target:T, properties:Dynamic, customActuator:Class<GenericActuator<T>> = null):GenericActuator<T> {
+		stop(target, properties);
 
 		if (customActuator == null) {
-
 			customActuator = cast defaultActuator;
-
 		}
 
-		var actuator:GenericActuator<T> = Type.createInstance (customActuator, [ target, 0, properties ]);
-		actuator.apply ();
+		var actuator:GenericActuator<T> = Type.createInstance(customActuator, [target, 0, properties]);
+		actuator.apply();
 
 		return actuator;
-
 	}
 
-
 	#if openfl
-
 	/**
 	 * Creates a new effects tween
 	 * @param	target		The object to tween
@@ -61,59 +50,40 @@ class Actuate {
 	 * @param	overwrite		Sets whether previous tweens for the same target and properties will be overwritten (Default is true)
 	 * @return		An EffectsOptions instance, which is used to select the kind of effect you would like to apply to the target
 	 */
-	public static function effects (target:DisplayObject, duration:Float, overwrite:Bool = true):EffectsOptions {
-
-		return new EffectsOptions (target, duration, overwrite);
-
+	public static function effects(target:DisplayObject, duration:Float, overwrite:Bool = true):EffectsOptions {
+		return new EffectsOptions(target, duration, overwrite);
 	}
-
 	#end
 
-
-	private static function load<T> (actuator:GenericActuator<T>):Void {
-
-		var library = getLibrary (actuator.target);
-		if (library.indexOf (actuator) == -1) {
-
-			library.push (actuator);
-
+	private static function load<T>(actuator:GenericActuator<T>) {
+		var library = getLibrary(actuator.target);
+		if (library.indexOf(actuator) == -1) {
+			library.push(actuator);
 		}
-
 	}
 
-
-	private static function getLibrary<T> (target:T, allowCreation:Bool = true):Array<IGenericActuator> {
-
-		if (!targetLibraries.exists (target) && allowCreation) {
-
-			targetLibraries.set (target, new Array<IGenericActuator> ());
-
+	private static function getLibrary<T>(target:T, allowCreation:Bool = true):Array<IGenericActuator> {
+		if (!targetLibraries.exists(target) && allowCreation) {
+			targetLibraries.set(target, new Array<IGenericActuator>());
 		}
 
-		return targetLibraries.get (target);
-
+		return targetLibraries.get(target);
 	}
-
 
 	/**
 	 * Checks if Actuate has any active tweens
 	 * @return		Whether Actuate is active
 	 */
-	public static function isActive ():Bool {
-
+	public static function isActive():Bool {
 		var result = false;
 
 		for (library in targetLibraries) {
-
 			result = true;
 			break;
-
 		}
 
 		return result;
-
 	}
-
 
 	/**
 	 * Creates a new MotionPath tween
@@ -123,126 +93,83 @@ class Actuate {
 	 * @param	overwrite		Sets whether previous tweens for the same target and properties will be overwritten (Default is true)
 	 * @return		The current actuator instance, which can be used to apply properties like ease, delay, onComplete or onUpdate
 	 */
-	/*@:generic*/ public static function motionPath<T> (target:T, duration:Float, properties:Dynamic, overwrite:Bool = true):GenericActuator<T> {
-
-		return tween (target, duration, properties, overwrite, MotionPathActuator);
-
+	/*@:generic*/
+	public static function motionPath<T>(target:T, duration:Float, properties:Dynamic, overwrite:Bool = true):GenericActuator<T> {
+		return tween(target, duration, properties, overwrite, MotionPathActuator);
 	}
-
 
 	/**
 	 * Pauses tweens for the specified target objects
 	 * @param	... targets		The target objects which will have their tweens paused. Passing no value pauses tweens for all objects
 	 */
 	///*@:generic*/ public static function pause (... targets:Array):void {
-	/*@:generic*/ public static function pause<T> (target:T):Void {
-
+	/*@:generic*/
+	public static function pause<T>(target:T) {
 		if (target is IGenericActuator) {
-
 			var actuator:IGenericActuator = cast target;
-			actuator.pause ();
-
+			actuator.pause();
 		} else {
-
-			var library = getLibrary (target, false);
+			var library = getLibrary(target, false);
 
 			if (library != null) {
-
 				for (actuator in library) {
-
-					actuator.pause ();
-
+					actuator.pause();
 				}
-
 			}
-
 		}
-
 	}
 
-
-	public static function pauseAll ():Void {
-
+	public static function pauseAll() {
 		for (library in targetLibraries) {
-
 			for (actuator in library) {
-
-				actuator.pause ();
-
+				actuator.pause();
 			}
-
 		}
-
 	}
-
 
 	/**
 	 * Resets Actuate by stopping and removing tweens for all objects
 	 */
-	public static function reset ():Void {
-
+	public static function reset() {
 		for (library in targetLibraries) {
-
 			var i = library.length - 1;
 
 			while (i >= 0) {
-
-				library[i].stop (null, false, false);
+				library[i].stop(null, false, false);
 				i--;
-
 			}
-
 		}
 
-		targetLibraries = new ObjectMap<Dynamic, Array<IGenericActuator>> ();
-
+		targetLibraries = new ObjectMap<Dynamic, Array<IGenericActuator>>();
 	}
-
 
 	/**
 	 * Resumes paused tweens for the specified target objects
 	 * @param	... targets		The target objects which will have their tweens resumed. Passing no value resumes tweens for all objects
 	 */
-	/*@:generic*/ public static function resume<T> (target:T):Void {
-
+	/*@:generic*/
+	public static function resume<T>(target:T) {
 		if (target is IGenericActuator) {
-
 			var actuator:IGenericActuator = cast target;
-			actuator.resume ();
-
+			actuator.resume();
 		} else {
-
-			var library = getLibrary (target, false);
+			var library = getLibrary(target, false);
 
 			if (library != null) {
-
 				for (actuator in library) {
-
-					actuator.resume ();
-
+					actuator.resume();
 				}
-
 			}
-
 		}
-
 	}
 
-
-	public static function resumeAll ():Void {
-
+	public static function resumeAll() {
 		for (library in targetLibraries) {
-
 			for (actuator in library) {
-
-				actuator.resume ();
-
+				actuator.resume();
 			}
-
 		}
-
 	}
-
 
 	/**
 	 * Stops all tweens for an individual object
@@ -251,58 +178,40 @@ class Actuate {
 	 * @param	complete		If tweens should apply their final target values before stopping. Default is false (Optional)
 	 * @param	sendEvent	If a complete() event should be dispatched for the specified target. Default is true (Optional)
 	 */
-	/*@:generic*/ public static function stop<T> (target:T, properties:Dynamic = null, complete:Bool = false, sendEvent:Bool = true):Void {
-
+	/*@:generic*/
+	public static function stop<T>(target:T, properties:Dynamic = null, complete:Bool = false, sendEvent:Bool = true) {
 		if (target != null) {
-
 			if (target is IGenericActuator) {
-
 				var actuator:IGenericActuator = cast target;
-				actuator.stop (null, complete, sendEvent);
-
+				actuator.stop(null, complete, sendEvent);
 			} else {
-
-				var library = getLibrary (target, false);
+				var library = getLibrary(target, false);
 
 				if (library != null) {
-
 					if (properties is String) {
-
-						var temp = { };
-						Reflect.setField (temp, properties, null);
+						var temp = {};
+						Reflect.setField(temp, properties, null);
 						properties = temp;
-
 					} else if (properties is Array) {
-
 						var temp = {};
 
-						for (property in (properties : Array <Dynamic>)) {
-
-							Reflect.setField (temp, property, null);
-
+						for (property in (properties : Array<Dynamic>)) {
+							Reflect.setField(temp, property, null);
 						}
 
 						properties = temp;
-
 					}
 
 					var i = library.length - 1;
 
 					while (i >= 0) {
-
-						library[i].stop (properties, complete, sendEvent);
+						library[i].stop(properties, complete, sendEvent);
 						i--;
-
 					}
-
 				}
-
 			}
-
 		}
-
 	}
-
 
 	/**
 	 * Creates a tween-based timer, which is useful for synchronizing function calls with other animations
@@ -311,15 +220,11 @@ class Actuate {
 	 * @param	customActuator		A custom actuator to use instead of the default (Optional)
 	 * @return		The current actuator instance, which can be used to apply properties like onComplete or to gain a reference to the target timer object
 	 */
-	public static function timer (duration:Float, customActuator:Class<GenericActuator<TweenTimer>> = null):GenericActuator<TweenTimer> {
-
-		return cast tween (new TweenTimer (0), duration, new TweenTimer (1), false, cast customActuator);
-
+	public static function timer(duration:Float, customActuator:Class<GenericActuator<TweenTimer>> = null):GenericActuator<TweenTimer> {
+		return cast tween(new TweenTimer(0), duration, new TweenTimer(1), false, cast customActuator);
 	}
 
-
 	#if openfl
-
 	/**
 	 * Creates a new transform tween
 	 * @example		<code>Actuate.transform (MyClip, 1).color (0xFF0000);</code>
@@ -328,14 +233,11 @@ class Actuate {
 	 * @param	overwrite		Sets whether previous tweens for the same target and properties will be overwritten (Default is true)
 	 * @return		A TransformOptions instance, which is used to select the kind of transform you would like to apply to the target
 	 */
-	/*@:generic*/ public static function transform<T> (target:T, duration:Float = 0, overwrite:Bool = true):TransformOptions<T> {
-
-		return new TransformOptions (target, duration, overwrite);
-
+	/*@:generic*/
+	public static function transform<T>(target:T, duration:Float = 0, overwrite:Bool = true):TransformOptions<T> {
+		return new TransformOptions(target, duration, overwrite);
 	}
-
 	#end
-
 
 	/**
 	 * Creates a new tween
@@ -347,70 +249,53 @@ class Actuate {
 	 * @param	customActuator		A custom actuator to use instead of the default (Optional)
 	 * @return		The current actuator instance, which can be used to apply properties like ease, delay, onComplete or onUpdate
 	 */
-	/*@:generic*/ public static function tween<T> (target:T, duration:Float, properties:Dynamic, overwrite:Bool = true, customActuator:Class<GenericActuator<T>> = null):GenericActuator<T> {
-
+	/*@:generic*/
+	public static function tween<T>(target:T, duration:Float, properties:Dynamic, overwrite:Bool = true,
+			customActuator:Class<GenericActuator<T>> = null):GenericActuator<T> {
 		if (target != null) {
-
 			if (duration > 0) {
-
 				if (customActuator == null) {
-
 					customActuator = cast defaultActuator;
-
 				}
 
-				var actuator:GenericActuator<T> = Type.createInstance (customActuator, [ target, duration, properties ]);
-				var library = getLibrary (actuator.target);
+				var actuator:GenericActuator<T> = Type.createInstance(customActuator, [target, duration, properties]);
+				var library = getLibrary(actuator.target);
 
 				if (overwrite) {
-
 					var i = library.length - 1;
 
 					while (i >= 0) {
-						library[i].stop (actuator.properties, false, false);
+						library[i].stop(actuator.properties, false, false);
 						i--;
 					}
 
-					library = getLibrary (actuator.target);
-
+					library = getLibrary(actuator.target);
 				}
 
-				library.push (actuator);
-				actuator.move ();
+				library.push(actuator);
+				actuator.move();
 
 				return actuator;
-
 			} else {
-
-				return apply (target, properties, customActuator);
-
+				return apply(target, properties, customActuator);
 			}
-
 		}
 
 		return null;
-
 	}
 
-
-	/*@:generic*/ public static function unload<T> (actuator:GenericActuator<T>):Void {
-
+	/*@:generic*/
+	public static function unload<T>(actuator:GenericActuator<T>) {
 		var target = actuator.target;
 
-		if (targetLibraries.exists (target)) {
+		if (targetLibraries.exists(target)) {
+			targetLibraries.get(target).remove(actuator);
 
-			targetLibraries.get (target).remove (actuator);
-
-			if (targetLibraries.get (target).length == 0) {
-
-				targetLibraries.remove (target);
-
+			if (targetLibraries.get(target).length == 0) {
+				targetLibraries.remove(target);
 			}
-
 		}
-
 	}
-
 
 	/**
 	 * Creates a new tween that updates a method rather than setting the properties of an object
@@ -422,36 +307,26 @@ class Actuate {
 	 * @param	overwrite		Sets whether previous tweens for the same target and properties will be overwritten (Default is true)
 	 * @return		The current actuator instance, which can be used to apply properties like ease, delay, onComplete or onUpdate
 	 */
-	/*@:generic*/ public static function update<T> (target:T, duration:Float, start:Array <Dynamic> = null, end:Array <Dynamic> = null, overwrite:Bool = true):GenericActuator<T> {
+	/*@:generic*/
+	public static function update<T>(target:T, duration:Float, start:Array<Dynamic> = null, end:Array<Dynamic> = null,
+			overwrite:Bool = true):GenericActuator<T> {
+		var properties:Dynamic = {start: start, end: end};
 
-		var properties:Dynamic = { start: start, end: end };
-
-		return tween (target, duration, properties, overwrite, MethodActuator);
-
+		return tween(target, duration, properties, overwrite, MethodActuator);
 	}
-
-
 }
 
-
 #if openfl
-
 private class EffectsOptions {
-
-
 	private var duration:Float;
 	private var overwrite:Bool;
 	private var target:DisplayObject;
 
-
-	public function new (target:DisplayObject, duration:Float, overwrite:Bool) {
-
+	public function new(target:DisplayObject, duration:Float, overwrite:Bool) {
 		this.target = target;
 		this.duration = duration;
 		this.overwrite = overwrite;
-
 	}
-
 
 	/**
 	 * Creates a new BitmapFilter tween
@@ -459,34 +334,23 @@ private class EffectsOptions {
 	 * @param	properties		The end properties to use for the tween
 	 * @return		The current actuator instance, which can be used to apply properties like ease, delay, onComplete or onUpdate
 	 */
-	public function filter (reference:Dynamic, properties:Dynamic):IGenericActuator {
-
+	public function filter(reference:Dynamic, properties:Dynamic):IGenericActuator {
 		properties.filter = reference;
 
-		return Actuate.tween (target, duration, properties, overwrite, FilterActuator);
-
+		return Actuate.tween(target, duration, properties, overwrite, FilterActuator);
 	}
-
-
 }
 
-
 private class TransformOptions<T> {
-
-
 	private var duration:Float;
 	private var overwrite:Bool;
 	private var target:T;
 
-
-	public function new (target:T, duration:Float, overwrite:Bool) {
-
+	public function new(target:T, duration:Float, overwrite:Bool) {
 		this.target = target;
 		this.duration = duration;
 		this.overwrite = overwrite;
-
 	}
-
 
 	/**
 	 * Creates a new ColorTransform tween
@@ -495,20 +359,15 @@ private class TransformOptions<T> {
 	 * @param	alpha		The end alpha of the target. If you wish to tween alpha and tint simultaneously, you must do them both as part of the ColorTransform. A value of null will make no change to the alpha of the object (Default is null)
 	 * @return		The current actuator instance, which can be used to apply properties like ease, delay, onComplete or onUpdate
 	 */
-	public function color (value:Int = 0x000000, strength:Float = 1, alpha:Null <Float> = null):IGenericActuator {
-
-		var properties:Dynamic = { colorValue: value, colorStrength: strength };
+	public function color(value:Int = 0x000000, strength:Float = 1, alpha:Null<Float> = null):IGenericActuator {
+		var properties:Dynamic = {colorValue: value, colorStrength: strength};
 
 		if (alpha != null) {
-
 			properties.colorAlpha = alpha;
-
 		}
 
-		return Actuate.tween (target, duration, properties, overwrite, TransformActuator);
-
+		return Actuate.tween(target, duration, properties, overwrite, TransformActuator);
 	}
-
 
 	/**
 	 * Creates a new SoundTransform tween
@@ -516,43 +375,26 @@ private class TransformOptions<T> {
 	 * @param	pan		The end pan for the target, or null if you would like to ignore this property (Default is null)
 	 * @return		The current actuator instance, which can be used to apply properties like ease, delay, onComplete or onUpdate
 	 */
-	public function sound (volume:Null <Float> = null, pan:Null <Float> = null):IGenericActuator {
-
+	public function sound(volume:Null<Float> = null, pan:Null<Float> = null):IGenericActuator {
 		var properties:Dynamic = {};
 
 		if (volume != null) {
-
 			properties.soundVolume = volume;
-
 		}
 
 		if (pan != null) {
-
 			properties.soundPan = pan;
-
 		}
 
-		return Actuate.tween (target, duration, properties, overwrite, TransformActuator);
-
+		return Actuate.tween(target, duration, properties, overwrite, TransformActuator);
 	}
-
-
 }
-
 #end
 
-
 private class TweenTimer {
-
-
 	public var progress:Float;
 
-
-	public function new (progress:Float):Void {
-
+	public function new(progress:Float) {
 		this.progress = progress;
-
 	}
-
-
 }
