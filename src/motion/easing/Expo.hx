@@ -22,12 +22,7 @@ private class ExpoEaseInOut implements IEasing {
 	public function new() {}
 
 	public function calculate(k:Float):Float {
-		if (k == 0) {
-			return 0;
-		}
-		if (k == 1) {
-			return 1;
-		}
+		if (k == 0 || k == 1) return k;
 		if ((k /= 1 / 2.0) < 1.0) {
 			return 0.5 * Math.exp(6.931471805599453 * (k - 1));
 		}

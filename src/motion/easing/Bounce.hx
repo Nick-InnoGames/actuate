@@ -29,7 +29,7 @@ private class BounceEaseInOut implements IEasing {
 		if (k < .5) {
 			return BounceEaseIn._calculate(k * 2) * .5;
 		} else {
-			return BounceEaseOut._calculate(k * 2 - 1) * .5 + 1 * .5;
+			return BounceEaseOut._calculate(k * 2 - 1) * .5 + .5;
 		}
 	}
 }
