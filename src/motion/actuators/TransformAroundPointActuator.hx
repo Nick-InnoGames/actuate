@@ -84,7 +84,7 @@ class TransformAroundPointActuator<U> extends SimpleActuator<DisplayObject, U> {
 	private override function update(currentTime:Float) {
 		super.update(currentTime);
 
-		if (active && !paused) {
+		if ((active && !paused) || tweenPosition == 1) {
 			updatePosition();
 		}
 	}
