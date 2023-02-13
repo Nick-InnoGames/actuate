@@ -78,13 +78,6 @@ class TransformAroundPointActuator<U> extends SimpleActuator<DisplayObject, U> {
 			tweenedOffsetY = value - originY;
 		} else {
 			super.setProperty(details, value);
-		}
-	}
-
-	private override function update(currentTime:Float) {
-		super.update(currentTime);
-
-		if ((active && !paused) || tweenPosition == 1) {
 			updatePosition();
 		}
 	}
