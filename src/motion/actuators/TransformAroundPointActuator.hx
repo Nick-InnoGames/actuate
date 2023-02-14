@@ -78,8 +78,8 @@ class TransformAroundPointActuator<U> extends SimpleActuator<DisplayObject, U> {
 			tweenedOffsetY = value - originY;
 		} else {
 			super.setProperty(details, value);
-			updatePosition();
 		}
+		updatePosition();
 	}
 
 	private inline function getTransformedPoint(result:Point):Void {
